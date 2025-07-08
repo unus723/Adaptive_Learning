@@ -1,3 +1,7 @@
 openai
 streamlit
+<<<<<<< HEAD
 psycopg2-binary
+=======
+psycopg2-binary
+>>>>>>> e17d287 (4th)

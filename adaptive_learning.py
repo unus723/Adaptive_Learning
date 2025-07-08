@@ -16,10 +16,10 @@ except Exception as e:
 # === Database Connection ===
 def get_db_connection():
     return psycopg2.connect(
-        host=st.secrets["host"],
-        database=st.secrets["database"],
-        user=st.secrets["user"],
-        password=st.secrets["password"],
+        host=st.secrets["connections"]["aurora_db"]["host"],
+        database=st.secrets["connections"]["aurora_db"]["database"],
+        user=st.secrets["connections"]["aurora_db"]["username"], # Use "username" if that's what's in TOML
+        password=st.secrets["connections"]["aurora_db"]["password"],
         cursor_factory=RealDictCursor
     )
 
