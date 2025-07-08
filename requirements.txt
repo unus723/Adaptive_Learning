@@ -1,7 +1,4 @@
 openai
 streamlit
-<<<<<<< HEAD
 psycopg2-binary
-=======
-psycopg2-binary
->>>>>>> 74133fc9a333e8682c9d058865cf85db9d260217
+
