@@ -162,3 +162,26 @@ if st.session_state.step == "results":
 
 if st.session_state.step == "finished":
     st.info("You can now close this window.")
+
+st.header("Study Results Dashboard")
+
+try:
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    # Execute a SELECT query to get all results from your table
+    cur.execute("SELECT name, pre_score, post_score, timestamp FROM study_results ORDER BY timestamp DESC;")
+    results = cur.fetchall()
+
+    # Convert results to a Pandas DataFrame for easy display
+    if results:
+        df = pd.DataFrame(results)
+        st.dataframe(df) # Display the DataFrame as an interactive table
+    else:
+        st.info("No study results found yet.")
+
+    cur.close()
+    conn.close()
+
+except Exception as e:
+    st.error(f"Error loading results from database: {e}")
