@@ -1,23 +1,50 @@
 # streamlit_app.py
 import streamlit as st
 import openai
-import csv
 import os
 from datetime import datetime
+import psycopg2
+from psycopg2.extras import RealDictCursor
 
 # === Configuration ===
-# Best practice: Initialize the OpenAI client with the API key from Streamlit secrets
-# This is the new syntax for the OpenAI v1.x library
 try:
     client = openai.OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 except Exception as e:
     st.error(f"Could not initialize OpenAI client. Make sure your OPENAI_API_KEY is set in Streamlit secrets. Error: {e}")
     st.stop()
 
+# === Database Connection ===
+def get_db_connection():
+    return psycopg2.connect(
+        host=st.secrets["host"],
+        database=st.secrets["database"],
+        user=st.secrets["user"],
+        password=st.secrets["password"],
+        cursor_factory=RealDictCursor
+    )
 
-# === Functions ===
+def save_results_db(name, pre_score, post_score, timestamp):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS results (
+            id SERIAL PRIMARY KEY,
+            name TEXT,
+            pre_score INTEGER,
+            post_score INTEGER,
+            timestamp TIMESTAMP
+        )
+    """)
+    cur.execute(
+        "INSERT INTO results (name, pre_score, post_score, timestamp) VALUES (%s, %s, %s, %s)",
+        (name, pre_score, post_score, timestamp)
+    )
+    conn.commit()
+    cur.close()
+    conn.close()
+
+# === LLM Function ===
 def generate_lesson():
-    """Generates a lesson using the OpenAI API with the new syntax."""
     prompt = (
         "You are an expert teacher helping a student understand recursion.\n"
         "Give a short, clear explanation (<300 words), including:\n"
@@ -27,38 +54,18 @@ def generate_lesson():
         "End with a one-line summary tip."
     )
     try:
-        # The updated method call: client.chat.completions.create()
         response = client.chat.completions.create(
             model="gpt-4",
             messages=[{"role": "user", "content": prompt}],
             temperature=0.7
         )
-        # The response object structure is also updated
         return response.choices[0].message.content.strip()
     except Exception as e:
         st.error(f"Failed to generate lesson: {e}")
         return None
 
-def save_results(name, pre_score, post_score, timestamp):
-    """Saves the study results to a CSV file."""
-    # Note: On Streamlit Cloud, the filesystem is ephemeral.
-    # This means the CSV file will be reset on every app restart or dyno change.
-    # For persistent storage, consider using st.connection() with a database.
-    filename = "results.csv"
-    file_exists = os.path.isfile(filename)
-    try:
-        with open(filename, mode='a', newline='', encoding='utf-8') as f:
-            writer = csv.writer(f)
-            if not file_exists:
-                writer.writerow(["Name", "Pre_Score", "Post_Score", "Timestamp"])
-            writer.writerow([name, pre_score, post_score, timestamp])
-        return True
-    except Exception as e:
-        st.error(f"Failed to save results to CSV: {e}")
-        return False
-
+# === Quiz Function ===
 def ask_quiz(prefix):
-    """Displays a quiz and returns the score. The prefix prevents widget ID conflicts."""
     questions = [
         ("What is the 'base case' in a recursive function?", ["A. An infinite loop condition", "B. The condition that stops the recursion", "C. The variable that is changed in each call", "D. The maximum depth of the recursion"], "B. The condition that stops the recursion"),
         ("What does this Python code return? `def recur(x): if x==0: return 0 else: return x + recur(x-1); recur(3)`", ["A. 3", "B. 6", "C. 0", "D. An error"], "B. 6"),
@@ -66,18 +73,15 @@ def ask_quiz(prefix):
     ]
     score = 0
     for i, (q, opts, correct) in enumerate(questions):
-        # Using a unique key for each radio button is crucial in Streamlit
         user_ans = st.radio(q, opts, key=f"{prefix}_q{i}")
         if user_ans == correct:
             score += 1
     return score
 
 # === Streamlit UI ===
-
 st.title("📚 LLM-Powered Microlearning Study")
 st.subheader("Topic: Recursion in Programming")
 
-# Initialize session state to manage the flow of the study
 if 'step' not in st.session_state:
     st.session_state.step = "name_input"
 if 'name' not in st.session_state:
@@ -88,7 +92,6 @@ if 'post_score' not in st.session_state:
     st.session_state.post_score = 0
 if 'lesson' not in st.session_state:
     st.session_state.lesson = ""
-
 
 # Step 1: Get user's name
 if st.session_state.step == "name_input":
@@ -117,14 +120,14 @@ if st.session_state.step == "lesson":
     st.markdown("---")
     st.markdown("### Step 2: AI-Generated Microlesson")
     st.write("Click the button below to generate your personalized lesson on recursion.")
-    
+
     if st.button("Generate My Lesson"):
         with st.spinner("👩‍🏫 Generating your lesson... this may take a moment."):
             lesson_content = generate_lesson()
             if lesson_content:
                 st.session_state.lesson = lesson_content
                 st.success("Lesson generated!")
-    
+
     if st.session_state.lesson:
         st.text_area("Your Lesson on Recursion", st.session_state.lesson, height=350)
         if st.button("Continue to Post-Quiz"):
@@ -153,11 +156,9 @@ if st.session_state.step == "results":
 
     if st.button("Save My Results"):
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        if save_results(st.session_state.name, st.session_state.pre_score, st.session_state.post_score, timestamp):
-            st.success("✅ Your results have been recorded. Thank you for participating!")
-            st.session_state.step = "finished" # Move to a final state
-        else:
-            st.error("There was an issue saving your results. Please try again.")
+        save_results_db(st.session_state.name, st.session_state.pre_score, st.session_state.post_score, timestamp)
+        st.success("✅ Your results have been recorded in the database. Thank you for participating!")
+        st.session_state.step = "finished"
 
 if st.session_state.step == "finished":
     st.info("You can now close this window.")
