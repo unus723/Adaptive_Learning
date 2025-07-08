@@ -170,7 +170,7 @@ try:
     cur = conn.cursor()
 
     # Execute a SELECT query to get all results from your table
-    cur.execute("SELECT name, pre_score, post_score, timestamp FROM study_results ORDER BY timestamp DESC;")
+    cur.execute("SELECT name, pre_score, post_score, timestamp FROM results ORDER BY timestamp DESC;")
     results = cur.fetchall()
 
     # Convert results to a Pandas DataFrame for easy display
