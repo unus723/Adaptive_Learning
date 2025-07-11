@@ -60,7 +60,7 @@ if 'pre_score' not in st.session_state:
 if 'post_score' not in st.session_state:
     st.session_state.post_score = 0
 if 'lesson' not in st.session_state:
-    st.session_state.lesson = ""
+    st.session_state.lesson = "" 
 
 # === Study Workflow ===
 if st.session_state.step == "name_input":
@@ -117,10 +117,11 @@ if st.session_state.step == "results":
     st.write(f"**Name:** {st.session_state.name}")
     st.write(f"**Pre-Quiz Score:** {st.session_state.pre_score} / 3")
     st.write(f"**Post-Quiz Score:** {st.session_state.post_score} / 3")
+    st.write("Thank you for participating in this study!")
     # This button should also have a key if it's not already handled by save_results_db
     if st.button("Save My Results", key="save_results_button"): # Added key
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        save_results_db(st.session_state.name, st.session_state.pre_score, st.session_state.post_score, timestamp)
+        save_results_db(st.session_state.name, st.session_state.pre_score, st.session_state.post_score, st.session_state.username, timestamp)
         st.success("✅ Your results have been recorded in the database. Thank you for participating!")
         st.session_state.step = "finished"
 

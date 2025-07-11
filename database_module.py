@@ -7,7 +7,7 @@ import bcrypt
 def get_db_connection():
     return psycopg2.connect(
         host=st.secrets["connections"]["aurora_db"]["host"],
-        database=st.secrets["connections"]["aurora_db"]["database"],
+        database=st.secrets["connections"]["aurora_db"]["   "],
         user=st.secrets["connections"]["aurora_db"]["username"],
         password=st.secrets["connections"]["aurora_db"]["password"],
         sslmode="require",
@@ -15,7 +15,7 @@ def get_db_connection():
     )
 
 # === Results Storage ===
-def save_results_db(name, pre_score, post_score, timestamp):
+def save_results_db(name, pre_score, post_score, username, timestamp):
     conn = get_db_connection()
     cur = conn.cursor()
     cur.execute("""
@@ -24,12 +24,13 @@ def save_results_db(name, pre_score, post_score, timestamp):
             name TEXT,
             pre_score INTEGER,
             post_score INTEGER,
+            username TEXT NOT NULL,
             timestamp TIMESTAMP
         )
     """)
     cur.execute(
-        "INSERT INTO results (name, pre_score, post_score, timestamp) VALUES (%s, %s, %s, %s)",
-        (name, pre_score, post_score, timestamp)
+        "INSERT INTO results (name, pre_score, post_score, username, timestamp) VALUES (%s, %s, %s, %s, %s)",
+        (name, pre_score, post_score, username, timestamp)
     )
     conn.commit()
     cur.close()
