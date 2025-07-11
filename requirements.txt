@@ -2,4 +2,3 @@ openai
 streamlit
 psycopg2-binary
 pandas
-database

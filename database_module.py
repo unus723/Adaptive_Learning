@@ -1,18 +1,20 @@
-from datetime import datetime
 import psycopg2
 from psycopg2.extras import RealDictCursor
 import streamlit as st
+import bcrypt
 
-# === Database Connection ===
+# === DB Connection ===
 def get_db_connection():
     return psycopg2.connect(
         host=st.secrets["connections"]["aurora_db"]["host"],
         database=st.secrets["connections"]["aurora_db"]["database"],
         user=st.secrets["connections"]["aurora_db"]["username"],
         password=st.secrets["connections"]["aurora_db"]["password"],
+        sslmode="require",
         cursor_factory=RealDictCursor
     )
 
+# === Results Storage ===
 def save_results_db(name, pre_score, post_score, timestamp):
     conn = get_db_connection()
     cur = conn.cursor()
@@ -33,17 +35,44 @@ def save_results_db(name, pre_score, post_score, timestamp):
     cur.close()
     conn.close()
 
-def save_user_db(username):
+# === User Management ===
+def create_user_table():
     conn = get_db_connection()
     cur = conn.cursor()
     cur.execute("""
         CREATE TABLE IF NOT EXISTS users (
             id SERIAL PRIMARY KEY,
-            username TEXT UNIQUE,
-            login_time TIMESTAMP
+            username TEXT UNIQUE NOT NULL,
+            password_hash TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
-    cur.execute("INSERT INTO users (username, login_time) VALUES (%s, %s) ON CONFLICT (username) DO NOTHING", (username, datetime.now()))
     conn.commit()
     cur.close()
     conn.close()
+
+def register_user(username, password):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    hashed_pw = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode('utf-8')
+    try:
+        cur.execute("INSERT INTO users (username, password_hash) VALUES (%s, %s)", (username, hashed_pw))
+        conn.commit()
+        return True
+    except psycopg2.errors.UniqueViolation:
+        conn.rollback()
+        return False
+    finally:
+        cur.close()
+        conn.close()
+
+def verify_user(username, password):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT password_hash FROM users WHERE username = %s", (username,))
+    result = cur.fetchone()
+    cur.close()
+    conn.close()
+    if result:
+        return bcrypt.checkpw(password.encode(), result['password_hash'].encode())
+    return False

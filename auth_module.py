@@ -1,31 +1,36 @@
-from datetime import datetime
 import streamlit as st
-from database import save_user_db
+from database_module import register_user, verify_user
 
 class Authenticator:
     def __init__(self):
-        if 'authenticated' not in st.session_state:
-            st.session_state.authenticated = False
-        if 'username' not in st.session_state:
-            st.session_state.username = ""
+        self.username = ""
 
-    def login(self):
+    def login_form(self):
+        st.subheader("🔐 Login")
         username = st.text_input("Username")
         password = st.text_input("Password", type="password")
         if st.button("Login"):
-            if username and password == st.secrets.get("DASHBOARD_PASSWORD"):
-                st.session_state.authenticated = True
+            if verify_user(username, password):
+                st.session_state.logged_in = True
                 st.session_state.username = username
-                save_user_db(username)
-                st.rerun()
+                st.success(f"Welcome back, {username}!")
+                return True
             else:
-                st.error("Invalid credentials.")
+                st.error("Invalid username or password.")
+        return False
+
+    def registration_form(self):
+        st.subheader("📝 Register")
+        username = st.text_input("Choose a username")
+        password = st.text_input("Choose a password", type="password")
+        if st.button("Register"):
+            if register_user(username, password):
+                st.success("Registration successful! You can now log in.")
+            else:
+                st.error("Username already exists. Please choose another.")
 
     def logout(self):
-        if st.button("Logout"):
-            st.session_state.authenticated = False
-            st.session_state.username = ""
-            st.rerun()
-
-    def is_authenticated(self):
-        return st.session_state.get("authenticated", False)
+        if st.session_state.get("logged_in"):
+            if st.button("Logout"):
+                st.session_state.clear()
+                st.success("You have been logged out.")
