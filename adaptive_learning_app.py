@@ -12,18 +12,30 @@ lesson_gen = LessonGenerator()
 quiz = Quiz()
 
 # === User Authentication ===
+# Ensure login state is initialized
 if 'logged_in' not in st.session_state:
     st.session_state.logged_in = False
 
 if not st.session_state.logged_in:
-    login_successful = auth.login_form()
-    if login_successful:
-        st.experimental_rerun()
-    if not st.session_state.logged_in:
+    st.subheader("🔐 Authentication")
+
+    auth_mode = st.radio("Choose an option", ["Login", "Register"], horizontal=True)
+
+    if auth_mode == "Login":
+        login_successful = auth.login_form()
+        if login_successful:
+            st.experimental_rerun()
+        else:
+            st.stop()
+
+    elif auth_mode == "Register":
+        auth.registration_form()
         st.stop()
 
+# If logged in, continue
 st.write(f"Welcome, {st.session_state.username}!")
 auth.logout()
+
 
 # === App Title ===
 st.title("\U0001F4DA LLM-Powered Microlearning Study")
