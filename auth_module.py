@@ -9,7 +9,7 @@ class Authenticator:
         st.subheader("🔐 Login")
         username = st.text_input("Username")
         password = st.text_input("Password", type="password")
-        if st.button("Login"):
+        if st.button("Login", key="login_button"):
             if verify_user(username, password):
                 st.session_state.logged_in = True
                 st.session_state.username = username
@@ -23,7 +23,7 @@ class Authenticator:
         st.subheader("📝 Register")
         username = st.text_input("Choose a username")
         password = st.text_input("Choose a password", type="password")
-        if st.button("Register"):
+        if st.button("Register", key="register_button"):
             if register_user(username, password):
                 st.success("Registration successful! You can now log in.")
             else:
@@ -31,6 +31,6 @@ class Authenticator:
 
     def logout(self):
         if st.session_state.get("logged_in"):
-            if st.button("Logout"):
+            if st.button("Logout", key="logout_button"):
                 st.session_state.clear()
                 st.success("You have been logged out.")
