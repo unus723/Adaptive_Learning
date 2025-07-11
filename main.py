@@ -20,7 +20,7 @@ if not st.session_state.logged_in:
     if auth_mode == "Login":
         login_successful = auth.login_form()
         if login_successful:
-            st.experimental_rerun()
+            st.rerun()
         st.stop()
     elif auth_mode == "Register":
         auth.registration_form()
