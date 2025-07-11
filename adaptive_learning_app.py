@@ -12,8 +12,10 @@ lesson_gen = LessonGenerator()
 quiz = Quiz()
 
 # === User Authentication ===
-auth.login()
-if not auth.is_authenticated():
+if 'authenticated' not in st.session_state:
+    auth.login_form()
+    st.session_state.authenticated = auth.is_authenticated()
+if not st.session_state.authenticated:
     st.stop()
 
 # === App Title ===
