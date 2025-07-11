@@ -46,8 +46,8 @@ if not st.session_state.logged_in:
 st.write(f"Welcome, {st.session_state.username}!") # This line will now only show for logged-in users
 
 # === App Title ===
-st.title("\U0001F4DA LLM-Powered Microlearning Study")
-st.subheader("Topic: Recursion in Programming")
+st.title("\U0001F4DA Microlearning Study")
+st.subheader("Topic: Recursion")
 
 # === Session State Initialization for Study Workflow ===
 # Only initialize these if they don't exist, and only for logged-in users
@@ -85,7 +85,7 @@ if st.session_state.step == "pre_quiz":
 
 if st.session_state.step == "lesson":
     st.markdown("---")
-    st.markdown("### Step 2: AI-Generated Microlesson")
+    st.markdown("### Step 2: Microlesson")
     st.write("Click the button below to generate your personalized lesson on recursion.")
     if st.button("Generate My Lesson", key="generate_lesson_button"): # Added key
         with st.spinner("\U0001F469‍\U0001F3EB Generating your lesson... this may take a moment."):
@@ -117,12 +117,10 @@ if st.session_state.step == "results":
     st.write(f"**Name:** {st.session_state.name}")
     st.write(f"**Pre-Quiz Score:** {st.session_state.pre_score} / 3")
     st.write(f"**Post-Quiz Score:** {st.session_state.post_score} / 3")
-    st.write("Thank you for participating in this study!")
     # This button should also have a key if it's not already handled by save_results_db
     if st.button("Save My Results", key="save_results_button"): # Added key
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         save_results_db(st.session_state.name, st.session_state.pre_score, st.session_state.post_score, st.session_state.username, timestamp)
-        st.success("✅ Your results have been recorded in the database. Thank you for participating!")
         st.session_state.step = "finished"
 
 if st.session_state.step == "finished":
