@@ -7,7 +7,7 @@ import bcrypt
 def get_db_connection():
     return psycopg2.connect(
         host=st.secrets["connections"]["aurora_db"]["host"],
-        database=st.secrets["connections"]["aurora_db"]["   "],
+        database=st.secrets["connections"]["aurora_db"][" database"],
         user=st.secrets["connections"]["aurora_db"]["username"],
         password=st.secrets["connections"]["aurora_db"]["password"],
         sslmode="require",
