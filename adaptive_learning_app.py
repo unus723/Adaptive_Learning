@@ -163,9 +163,9 @@ if st.session_state.logged_in:  # Explicit check
 # This ensures it's only rendered once if the user is logged in.
 if st.session_state.logged_in:
     # Using columns for placement, e.g., to the right
-    col1, col2, col3 = st.columns([0.1, 0.8, 0.1])
-    with col3: # Place it in the rightmost column
-        if st.button("Logout", key="main_app_logout_button"): # <--- Unique key
-            st.session_state.clear() # Clear all session state
+    col1, col2, col3 = st.columns([0.3, 0.4, 0.3])
+    with col2:  # Place it in the center column
+        if st.button("Logout", key="main_app_logout_button"):
+            st.session_state.clear()
             st.success("You have been logged out.")
-            st.rerun() # Immediately rerun the app to go back to the login state
+            st.rerun()
