@@ -31,9 +31,7 @@ render_ui(st.session_state.username)
 
 # Show logout button at bottom
 if st.session_state.logged_in:
-    col1, col2, col3 = st.columns([0.3, 0.4, 0.3])
-    with col2:
-        if st.button("Logout", key="logout_button"):
-            st.session_state.clear()
-            st.success("You have been logged out.")
-            st.rerun()
+    if st.button("Logout", key="logout_button"):
+        st.session_state.clear()
+        st.success("You have been logged out.")
+        st.rerun()
