@@ -131,34 +131,35 @@ if st.session_state.step == "finished":
 # === Dashboard (restricted) ===
 # This dashboard should ideally only be shown to logged-in users.
 # The `st.stop()` above handles this, but if you want to be explicit:
-if st.session_state.logged_in: # Explicit check
-    st.header("Study Results Dashboard")
-    try:
-        conn = get_db_connection()
-        cur = conn.cursor()
-        # Ensure the 'results' table is created if it doesn't exist
-        cur.execute("""
-            CREATE TABLE IF NOT EXISTS results (
-                id SERIAL PRIMARY KEY,
-                name TEXT,
-                pre_score INTEGER,
-                post_score INTEGER,
-                timestamp TIMESTAMP
-            )
-        """)
-        conn.commit() # Commit the table creation if it happened
-        
-        cur.execute("SELECT name, pre_score, post_score, timestamp FROM results ORDER BY timestamp DESC;")
-        results = cur.fetchall()
-        if results:
-            df = pd.DataFrame(results)
-            st.dataframe(df)
-        else:
-            st.info("No study results found yet.")
-        cur.close()
-        conn.close()
-    except Exception as e:
-        st.error(f"Error loading results from database: {e}")
+if st.session_state.logged_in:  # Explicit check
+    with st.expander("Results"):
+        st.header("Results")
+        try:
+            conn = get_db_connection()
+            cur = conn.cursor()
+            # Ensure the 'results' table is created if it doesn't exist
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS results (
+                    id SERIAL PRIMARY KEY,
+                    name TEXT,
+                    pre_score INTEGER,
+                    post_score INTEGER,
+                    timestamp TIMESTAMP
+                )
+            """)
+            conn.commit()  # Commit the table creation if it happened
+
+            cur.execute("SELECT name, pre_score, post_score, timestamp FROM results WHERE username = %s ORDER BY timestamp DESC;", (st.session_state.username,))
+            results = cur.fetchall()
+            if results:
+                df = pd.DataFrame(results)
+                st.dataframe(df)
+            else:
+                st.info("No study results found yet.")
+            cur.close()
+            conn.close()
+        except Exception as e:
+            st.error(f"Error loading results from database: {e}")
 
 # === Logout Button (single instance, at the very end for logged-in users) ===
 # This ensures it's only rendered once if the user is logged in.
