@@ -15,7 +15,8 @@ if 'username' not in st.session_state:
 # Handle Authentication (Login/Register)
 if not st.session_state.logged_in:
     st.subheader("\U0001F512 Micro Learning")
-    auth_mode = st.radio("LOGIN/SIGNUP", ["Login if you have an account", "First time users: Register"], horizontal=True, key="auth_mode_radio")
+    st.subheader("Access Your Personalized Learning Journey")
+    auth_mode = st.radio("Login or Register:", ["Login", "Register"], horizontal=True, key="auth_mode_radio")
 
     if auth_mode == "Login":
         login_successful = auth.login_form()
