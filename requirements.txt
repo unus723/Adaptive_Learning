@@ -1,5 +1,5 @@
 openai
 streamlit
-psycopg2-binary
+supabase-py 
 pandas
 bcrypt
