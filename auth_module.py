@@ -6,7 +6,6 @@ class Authenticator:
         self.username = ""
 
     def login_form(self):
-        st.subheader("🔐 Login")
         username = st.text_input("Username")
         password = st.text_input("Password", type="password")
         if st.button("Login", key="login_button"):
@@ -20,7 +19,6 @@ class Authenticator:
         return False
 
     def registration_form(self):
-        st.subheader("📝 Register")
         username = st.text_input("Choose a username")
         password = st.text_input("Choose a password", type="password")
         if st.button("Register", key="register_button"):
