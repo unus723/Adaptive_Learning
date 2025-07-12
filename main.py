@@ -34,8 +34,7 @@ if not st.session_state.logged_in:
 # Topic selection
 if 'selected_topic' not in st.session_state:
     st.session_state.selected_topic = None
-
-st.sidebar.title("Study Options")
+st.sidebar.subheader("Study Options")
 topics = [
     "Supervised Learning",
     "Unsupervised Learning",
@@ -51,8 +50,8 @@ topics = [
     "Dimensionality Reduction",
     "Time Series Analysis"
 ]
-st.sidebar.markdown("---")  # Add a horizontal line below the title
-
+if 'topic_select_radio' not in st.session_state:
+    st.session_state.topic_select_radio = topics[0]  # Default to first topic
 st.sidebar.radio("Choose a topic:", topics, key="topic_select_radio")
 st.session_state.selected_topic = st.session_state.topic_select_radio
 

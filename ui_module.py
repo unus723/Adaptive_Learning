@@ -91,4 +91,7 @@ def render_ui(username, topic):
 
     if st.session_state.step == "finished":
         st.info("You can now close the window or restart to try a new topic.")
+        if st.button("Restart"):
+            st.session_state.clear()
+            st.rerun()
 
