@@ -1,39 +1,43 @@
+# quiz_module.py
 import streamlit as st
+import openai
+import random
 
 class Quiz:
     def __init__(self):
-        self.questions = [
-            (
-                "What is the 'base case' in a recursive function?",
-                [
-                    "A. An infinite loop condition",
-                    "B. The condition that stops the recursion",
-                    "C. The variable that is changed in each call",
-                    "D. The maximum depth of the recursion"
-                ],
-                "B. The condition that stops the recursion"
-            ),
-            (
-                "What does this Python code return? `def recur(x): if x==0: return 0 else: return x + recur(x-1); recur(3)`",
-                ["A. 3", "B. 6", "C. 0", "D. An error"],
-                "B. 6"
-            ),
-            (
-                "Why can deep recursion lead to a 'stack overflow' error?",
-                [
-                    "A. Because it uses too many variables",
-                    "B. Because it creates too many loops",
-                    "C. Because it consumes too much memory with nested function calls",
-                    "D. Because the return type is wrong"
-                ],
-                "C. Because it consumes too much memory with nested function calls"
-            )
-        ]
+        try:
+            self.client = openai.OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+        except Exception as e:
+            st.error(f"Failed to initialize OpenAI client: {e}")
+            self.client = None
 
-    def ask_quiz(self, prefix):
+    def generate_quiz(self, topic):
+        if not self.client:
+            return []
+
+        prompt = (
+            f"Generate 3 multiple-choice questions on the topic '{topic}'. "
+            f"Each question should have exactly 4 options and specify the correct answer. "
+            f"Format as a Python list of dictionaries like this: \n"
+            f"[{{'question': '...', 'options': ['A. ...', 'B. ...', 'C. ...', 'D. ...'], 'answer': 'A. ...'}}, ...]"
+        )
+        try:
+            response = self.client.chat.completions.create(
+                model="gpt-4",
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0.7
+            )
+            result = response.choices[0].message.content.strip()
+            questions = eval(result)  # Caution: only use eval() here because input is fully controlled
+            return questions
+        except Exception as e:
+            st.error(f"Failed to generate quiz: {e}")
+            return []
+
+    def ask_dynamic_quiz(self, prefix, questions):
         score = 0
-        for i, (q, opts, correct) in enumerate(self.questions):
-            user_ans = st.radio(q, opts, key=f"{prefix}_q{i}")
-            if user_ans == correct:
+        for i, q in enumerate(questions):
+            user_ans = st.radio(q['question'], q['options'], key=f"{prefix}_q{i}")
+            if user_ans == q['answer']:
                 score += 1
         return score

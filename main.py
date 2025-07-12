@@ -2,9 +2,13 @@
 import streamlit as st
 from auth_module import Authenticator
 from ui_module import render_ui
+from lesson_module import LessonGenerator
+from quiz_module import Quiz
 
-# Initialize authentication object
+# Initialize modules
 auth = Authenticator()
+lesson_gen = LessonGenerator()
+quiz = Quiz()
 
 # Set up login session states
 if 'logged_in' not in st.session_state:
@@ -27,12 +31,28 @@ if not st.session_state.logged_in:
         auth.registration_form()
         st.stop()
 
-# User is authenticated: render app UI
-render_ui(st.session_state.username)
+# Topic selection
+if 'selected_topic' not in st.session_state:
+    st.session_state.selected_topic = "Recursion"
+
+st.sidebar.title("Study Options")
+topics = [
+     "Supervised Learning", "Unsupervised Learning", "Reinforcement Learning",
+    "Neural Networks", "Deep Learning", "Natural Language Processing", "Computer Vision",
+    "Model Evaluation", "Feature Engineering", "Ensemble Methods", "Clustering",
+    "Dimensionality Reduction", "Time Series Analysis" ]
+
+st.session_state.selected_topic = st.sidebar.selectbox("Choose a topic:", topics, key="topic_select")
+
+# User is authenticated: render app UI with selected topic
+render_ui(st.session_state.username, st.session_state.selected_topic)
 
 # Show logout button at bottom
 if st.session_state.logged_in:
-    if st.button("Logout", key="logout_button"):
-        st.session_state.clear()
-        st.success("You have been logged out.")
-        st.rerun()
+    col1, col2, col3 = st.columns([0.3, 0.4, 0.3])
+    with col2:
+        if st.button("Logout", key="logout_button"):
+            st.session_state.clear()
+            st.success("You have been logged out.")
+            st.rerun()
+
