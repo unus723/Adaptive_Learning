@@ -38,7 +38,7 @@ def render_ui(username, topic):
         st.info(f"Welcome, {st.session_state.name}!")
         st.markdown("### Step 1: Pre-Quiz")
         st.markdown("Please answer these questions to the best of your ability.")
-        pre_score = quiz.ask_quiz(prefix="pre", topic=topic)
+        pre_score = quiz.ask_dynamic_quiz(prefix="pre", topic=topic)
         if st.button("Submit Pre-Quiz"):
             st.session_state.pre_score = pre_score
             st.session_state.step = "lesson"
