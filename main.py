@@ -33,16 +33,27 @@ if not st.session_state.logged_in:
 
 # Topic selection
 if 'selected_topic' not in st.session_state:
-    st.session_state.selected_topic = "Recursion"
+    st.session_state.selected_topic = None
 
 st.sidebar.title("Study Options")
 topics = [
-     "Supervised Learning", "Unsupervised Learning", "Reinforcement Learning",
-    "Neural Networks", "Deep Learning", "Natural Language Processing", "Computer Vision",
-    "Model Evaluation", "Feature Engineering", "Ensemble Methods", "Clustering",
-    "Dimensionality Reduction", "Time Series Analysis" ]
+    "Supervised Learning",
+    "Unsupervised Learning",
+    "Reinforcement Learning",
+    "Neural Networks",
+    "Deep Learning",
+    "Natural Language Processing",
+    "Computer Vision",
+    "Model Evaluation",
+    "Feature Engineering",
+    "Ensemble Methods",
+    "Clustering",
+    "Dimensionality Reduction",
+    "Time Series Analysis"
+]
 
-st.session_state.selected_topic = st.sidebar.selectbox("Choose a topic:", topics, key="topic_select")
+selected = st.sidebar.selectbox("Choose a topic:", topics, key="topic_select")
+st.session_state.selected_topic = selected
 
 # User is authenticated: render app UI with selected topic
 render_ui(st.session_state.username, st.session_state.selected_topic)
