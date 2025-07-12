@@ -53,8 +53,8 @@ topics = [
 ]
 st.sidebar.markdown("---")  # Add a horizontal line below the title
 
-selected = st.sidebar.selectbox("Choose a topic:", topics, key="topic_select")
-st.session_state.selected_topic = selected
+st.sidebar.radio("Choose a topic:", topics, key="topic_select_radio")
+st.session_state.selected_topic = st.session_state.topic_select_radio
 
 # User is authenticated: render app UI with selected topic
 render_ui(st.session_state.username, st.session_state.selected_topic)
