@@ -41,3 +41,14 @@ class Quiz:
             if user_ans == q['answer']:
                 score += 1
         return score
+    
+    def ask_quiz(self, prefix, topic):
+        questions = self.generate_quiz(topic)
+        if not questions:
+            st.error("Failed to generate quiz questions.")
+            return 0
+
+        st.markdown(f"### {prefix.capitalize()} Quiz")
+        score = self.ask_dynamic_quiz(prefix, questions)
+        st.success(f"You scored {score} out of {len(questions)}")
+        return score
