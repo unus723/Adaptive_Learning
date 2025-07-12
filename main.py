@@ -51,6 +51,7 @@ topics = [
     "Dimensionality Reduction",
     "Time Series Analysis"
 ]
+st.sidebar.markdown("---")  # Add a horizontal line below the title
 
 selected = st.sidebar.selectbox("Choose a topic:", topics, key="topic_select")
 st.session_state.selected_topic = selected
