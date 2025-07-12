@@ -36,17 +36,22 @@ class Quiz:
 
     def ask_dynamic_quiz(self, prefix, questions):
         score = 0
-        for i, q in enumerate(questions):
-            user_ans = st.radio(q['question'], q['options'], key=f"{prefix}_q{i}")
-            if user_ans == q['answer']:
-                score += 1
+        with st.expander(f"{prefix.capitalize()} Quiz", expanded=True):
+            for i, q in enumerate(questions):
+                user_ans = st.radio(q['question'], q['options'], key=f"{prefix}_q{i}")
+                if user_ans == q['answer']:
+                    score += 1
         return score
 
     def ask_quiz(self, prefix, topic):
-        questions = self.generate_quiz(topic)
+        if f'{prefix}_questions' not in st.session_state:
+            st.session_state[f'{prefix}_questions'] = self.generate_quiz(topic)
+
+        questions = st.session_state[f'{prefix}_questions']
+
         if not questions:
             st.error("Failed to generate quiz questions.")
             return 0
 
-        st.markdown(f"### {prefix.capitalize()} Quiz")
-        return self.ask_dynamic_quiz(prefix, questions)
+        score = self.ask_dynamic_quiz(prefix, questions)
+        return score
