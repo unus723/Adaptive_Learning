@@ -1,7 +1,7 @@
 # quiz_module.py
 import streamlit as st
 import openai
-import random
+import ast
 
 class Quiz:
     def __init__(self):
@@ -28,7 +28,7 @@ class Quiz:
                 temperature=0.7
             )
             result = response.choices[0].message.content.strip()
-            questions = eval(result)  # Caution: only use eval() here because input is fully controlled
+            questions = ast.literal_eval(result)  # Use safer parser
             return questions
         except Exception as e:
             st.error(f"Failed to generate quiz: {e}")
@@ -41,7 +41,7 @@ class Quiz:
             if user_ans == q['answer']:
                 score += 1
         return score
-    
+
     def ask_quiz(self, prefix, topic):
         questions = self.generate_quiz(topic)
         if not questions:
@@ -49,6 +49,4 @@ class Quiz:
             return 0
 
         st.markdown(f"### {prefix.capitalize()} Quiz")
-        score = self.ask_dynamic_quiz(prefix, questions)
-        st.success(f"You scored {score} out of {len(questions)}")
-        return score
+        return self.ask_dynamic_quiz(prefix, questions)
